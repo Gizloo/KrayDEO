@@ -221,16 +221,17 @@ def test_norm(requesthandler):
     callback_retr = ''
 
     if callback.fuel_up:
-
+        diff = round(fuel_up_f - fuel_up, 2)
         callback_retr += "Заправка не сходится:" + str(round(fuel_up_f - fuel_up, 2)) + ";"
-        callback_fuel_info = f"Заправка не сходится, разница = {round(fuel_up_f - fuel_up, 2)}"
+        callback_fuel_info = "Заправка не сходится, разница = {}".format(diff)
 
     elif callback.nedoliv:
+        diff = round((fuel_up - fuel_up_f), 2)
         callback_retr += "Недолив:" + str(round((fuel_up - fuel_up_f), 2)) + ";"
-        callback_fuel_info = f"Недолив, объемом = {round((fuel_up - fuel_up_f), 2)}"
+        callback_fuel_info = "Недолив, объемом = {}".format(diff)
     else:
         callback_retr += "Ok;"  # Заправка ОК
-        callback_fuel_info = f"Заправка ОК"
+        callback_fuel_info = "Заправка ОК"
 
     if callback.fuel_down:
         callback_retr += str(round(fuel_down, 2)) + ";"
@@ -239,38 +240,41 @@ def test_norm(requesthandler):
     diff_start = round(float(start_fuel_n)-float(start_fuel_f))
     if callback.fuel_start:
         callback_retr += "Нач ур. не сходится!;"
-        callback_start_info = f"Нач ур. не сходится! Разница в {diff_start} л."
+        callback_start_info = "Нач ур. не сходится! Разница в {} л.".format(diff_start)
     else:
         callback_retr += "Ok;"  # Нач ур. ОК
         callback_start_info = "Нач. уровень сходится"
 
     """Дальше один из 4 вариантов"""
     if callback.short:
+        pr_volume_consum = round((float(consumption_n)/float(volume_tank))*100, 2)
         callback_retr += "Короткая поездка, списание по норме;"
-        callback_consum_info = "Короткая поездка, списание по норме, потрачено меньше 2% от бака"
+        callback_consum_info = "Короткая поездка, потрачено {}% от бака, списание по норме".format(pr_volume_consum)
 
     elif callback.perejog:
+        diff = round(consum_f - consumption_n, 2)
         callback_retr += "Пережог топлива:" + str(round(consum_f - consumption_n, 2)) + ", списание по факту;"
-        callback_consum_info = f"Пережог топлива, объем = {round(consum_f - consumption_n, 2)}, списание по факту"
+        callback_consum_info = "Пережог топлива, объем = {}, списание по факту".format(diff)
 
     elif callback.economy and not callback.nedoliv and not callback.fuel_down:
+        diff = round(consumption_n - consum_f, 2)
         callback_retr += "Экономия топлива:" + str(round(consumption_n - consum_f, 2)) + ", списание по факту;"
-        callback_consum_info = f"Экономия топлива, объем = {round(consumption_n - consum_f, 2)}, списание по факту"
+        callback_consum_info = "Экономия топлива, объем = {}, списание по факту".format(diff)
 
     else:
         callback_retr += "Расход сходится"
         callback_consum_info = 'Расход сходится (В пределах погрешности)'
 
     if float(fuel_down) > 0:
-        fuel_down_info = f'Слито {fuel_down}! Необходимо провести служебное расследование'
+        fuel_down_info = 'Слито {}! Необходимо провести служебное расследование'.format(fuel_down)
     else:
-        fuel_down_info ='Cливов не зафиксировано'
+        fuel_down_info = 'Cливов не зафиксировано'
 
     end_fuel_n = float(start_fuel_n) - float(consumption_n) + float(fuel_up)
     data_obj = wialon.core_search_item({"id": ID, "flags": 0x00000001})
     name_obj = data_obj['item']['nm']
-    start_period = f'{d}.{m}.{y}. {h}:{min}:{s}'
-    end_period = f'{d1}.{m1}.{y1}. {h1}:{min1}:{s1}'
+    start_period = '{}.{}.{}. {}:{}:{}'.format(d,m,y,h,min,s)
+    end_period = '{}.{}.{}. {}:{}:{}'.format(d1,m1,y1,h1,min1,s1)
     return render_template('test_norm.html', name=name_obj, start_p=start_period,
                            end_period=end_period, start_fuel_n=start_fuel_n,
                            start_fuel_f=start_fuel_f, consumption_n=consumption_n, consum_f=consum_f, fuel_up=fuel_up,
