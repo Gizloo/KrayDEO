@@ -104,7 +104,7 @@ def execute_report2(res_id, wialon, id, t1, t2):
     })
 
     volume_tank = units1[0]['c'][0]
-    end_fuel_f = units1[0]['c'][5]
+    end_fuel_f = units1[0]['c'][5][:units1[0]['c'][5].find(' '):]
     fuel_up_f = units1[0]['c'][2]
     fuel_down = units1[0]['c'][3]
     start_fuel_f = units1[0]['c'][4]

@@ -132,7 +132,6 @@ def lost_data(wialon, units4, res_id, ID):
         for count in subrow:
             from_time = count['t1']
             to_time = count['t2']
-            print(f'from time: {from_time}; to time: {to_time}')
             units = execute_report3(res_id, wialon, ID, from_time, to_time)
 
             if -5 > float(units[4][1][:units[4][1].find(" "):]) - float(units[3][1][:units[3][1].find(" "):]) > 5:
@@ -141,7 +140,7 @@ def lost_data(wialon, units4, res_id, ID):
                 value = datetime.datetime.fromtimestamp(to_time)
                 end_time = (value.strftime('%Y-%m-%d %H:%M'))
                 lost_data = 'Lost Data (>10%)'
-                lost_data_info = f'Потеря данных! Зафиксирован прострел в период с {start_time} до {end_time}'
+                lost_data_info = 'Потеря данных! Зафиксировано падение топлива в период с {} до {}'.format(start_time, end_time)
                 return lost_data, lost_data_info
 
             else:
@@ -199,6 +198,6 @@ def lost_data(wialon, units4, res_id, ID):
                     value = datetime.datetime.fromtimestamp(to_time)
                     end_time = (value.strftime('%Y-%m-%d %H:%M'))
                     lost_data = 'Lost Data (>10%)'
-                    lost_data_info = f'Потеря данных! Зафиксирован прострел в период с {start_time} до {end_time}'
+                    lost_data_info = 'Потеря данных! Зафиксирован прострел в период с {} до {}'.format(start_time, end_time)
 
                     return lost_data, lost_data_info

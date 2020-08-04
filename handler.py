@@ -6,10 +6,10 @@ def handler1(calb1, mill, pr_count, pr_dist, from_time, to_time, wialon, units4,
     class callback:
         def __init__(self):
             self.data_status = 'Data OK'
-            self.data_info = 'Данные корректны'
+            self.data_info = 'Данные корректны, прострелов/сливов за период потери связи нет'
 
             self.track_status = 'Track OK'
-            self.track_info = 'Трек корректен'
+            self.track_info = 'Трек корректен, прострелов нет'
 
             self.dut_status = 'DUT OK'
             self.dut_info = 'ДУТ есть, работает'
@@ -28,7 +28,7 @@ def handler1(calb1, mill, pr_count, pr_dist, from_time, to_time, wialon, units4,
             pass
 
     if int(units5[0]['c'][3]) > 10 and float(units5[0]['c'][4]) > 3600:
-        if float(calb1[3][1])[:calb1[3][1].find(" "):] == 0 and float(calb1[4][1])[:calb1[4][1].find(" "):]:
+        if float(calb1[3][1][:calb1[3][1].find("l"):]) == 0 and float(calb1[4][1][:calb1[4][1].find("l"):]):
             object_ = wialon.core_search_item({"id": ID,
                                                "flags": 0x00001000})
             sens = object_['item']['sens']
@@ -59,7 +59,7 @@ def handler1(calb1, mill, pr_count, pr_dist, from_time, to_time, wialon, units4,
 
     if pr_count > 1 and pr_dist/1000 > int(mill)/100*85:
         callback.track_status = 'Track NotOk (<90%)'
-        callback.track_info = f'Зафиксировано {pr_count} прострелов; расстоянием {round(pr_dist/1000, 1)} км.'
+        callback.track_info = 'Зафиксировано {} прострелов; расстоянием {} км.'.format(pr_count, round(pr_dist/1000,1))
 
     object_ = wialon.core_search_item({"id": ID,
                                        "flags": 0x00001000})
@@ -67,7 +67,15 @@ def handler1(calb1, mill, pr_count, pr_dist, from_time, to_time, wialon, units4,
 
     for num, sen in sens.items():
         if 'engine operation' in sen["t"]:
-            h, m, s = calb1[2][1].split(':')
+            count_days = 0
+            if 'days' in calb1[2][1]:
+                count_days = calb1[2][1][:count_days.find('d'):]
+                count_days = int(count_days) * 24
+                time = calb1[2][1]['days'+4:]
+            else:
+                time = calb1[2][1]
+            h, m, s = time.split(':')
+            h = int(h) + count_days
             if int(h) > 0 or int(m) > 0 or int(s) > 0:
                 if 'pwr_ext' in sen["p"]:
                     callback.ign_status = 'IGN Warning'
