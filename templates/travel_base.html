@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Путевые</title>
+    <style>
+      table {width: 100%; border-collapse: separate; border-spacing: 4px;}
+      table thead tr {color: #ffffff; font-weight: bold; text-align: center}
+      table thead tr td {border-radius: 4px 4px 0 0; background: #2e82c3;}
+      table tbody tr td {border: 1px solid #2e82c3; border-radius: 4px; background: #cbdfef;}
+      table tbody tr td:hover {background: #a2c3dd; transition-duration: 0.2s;}
+    </style>
+</head>
+<body>
+<table>
+  <thead>
+    <tr>
+      <td>Дата путевого</td>
+      <td>Имя объекта</td>
+      <td>Начало</td>
+      <td>Конец</td>
+      <td>Нач.уров.(П)</td>
+      <td>Нач.уров.(СМТ)</td>
+      <td>Кон.уров.(П)</td>
+      <td>Кон.уров.(СМТ)</td>
+      <td>Заправка(П)</td>
+      <td>Заправка(В)</td>
+      <td>Расход(П)</td>
+      <td>Расход(СМТ)</td>
+      <td>Расход(Факт)</td>
+    </tr>
+  </thead>
+  <tbody>
+     {% for travel in travels %}
+        <tr>
+          <td>{{ travel.date_p.strftime("%d-%m-%Y %H:%M:%S")}}</td>
+          <td>{{ travel.name_object }}</td>
+          <td>{{ travel.start_time }}</td>
+          <td>{{ travel.end_time }}</td>
+          <td>{{ travel.start_fuel_p }}</td>
+          <td>{{ travel.start_fuel_w }}</td>
+          <td>{{ travel.end_fuel_p }}</td>
+          <td>{{ travel.end_fuel_w }}</td>
+          <td>{{ travel.fuel_up_p }}</td>
+          <td>{{ travel.fuel_up_w }}</td>
+          <td>{{ travel.consum_p }}</td>
+          <td>{{ travel.consum_w }}</td>
+          <td>{{ travel.consum_f }}</td>
+         </tr>
+     {% endfor %}
+  </tbody>
+</table>
+</body>
+</html>

@@ -1,12 +1,14 @@
 # -*- coding: utf-8 -*-
-
 import datetime
 import time
+
+from pony.orm import select, db_session, commit
 from wialon import Wialon, WialonError
 from flask import Flask, render_template
 from Exec_report import execute_report, execute_report2
 from down_data import api_wialon_dwnData
 from handler import handler1, handler2
+from models.base_model import Travel
 
 app = Flask(__name__)
 
@@ -16,7 +18,7 @@ def index(requestbot):
     req_b = str(requestbot)
     token, ID, TimeFrom, TimeTo = req_b.split(';')
     if token == 'db1cee3b1f964df20f8d163a1423b6c6286A919144720D152383E5DD77C6113AD31CDC9A':
-       token = 'db1cee3b1f964df20f8d163a1423b6c67D562ED72C4E60F2797A1247C61C9B977DBC7DCA'
+        token = 'db1cee3b1f964df20f8d163a1423b6c67D562ED72C4E60F2797A1247C61C9B977DBC7DCA'
     y, m, d, h, min, s = TimeFrom.split('-')
     y1, m1, d1, h1, min1, s1 = TimeTo.split('-')
     t1 = datetime.datetime(int(y), int(m), int(d), int(h), int(min), int(s))
@@ -29,7 +31,7 @@ def index(requestbot):
     try:
         login = wialon.token_login(token=str(token))
     except WialonError as e:
-        return('Error while login')
+        return ('Error while login')
     wialon.sid = login['eid']
     res_id = api_wialon_dwnData(wialon)
 
@@ -61,7 +63,7 @@ def norm(requesthandler):
 
     token, ID, TimeFrom, TimeTo, start_fuel_n, consumption_n, fuel_up = req_b.split(';')
     if token == 'db1cee3b1f964df20f8d163a1423b6c6286A919144720D152383E5DD77C6113AD31CDC9A':
-       token = 'db1cee3b1f964df20f8d163a1423b6c67D562ED72C4E60F2797A1247C61C9B977DBC7DCA'
+        token = 'db1cee3b1f964df20f8d163a1423b6c67D562ED72C4E60F2797A1247C61C9B977DBC7DCA'
     start_fuel_n.replace(',', '.')
     consumption_n.replace(',', '.')
     fuel_up.replace(',', '.')
@@ -80,12 +82,13 @@ def norm(requesthandler):
     try:
         login = wialon.token_login(token=str(token))
     except WialonError as e:
-        return('Error while login')
+        return ('Error while login')
     wialon.sid = login['eid']
     res_id = api_wialon_dwnData(wialon)
 
     if res_id:
-        volume_tank, end_fuel_f, fuel_up_f, fuel_down, start_fuel_f = execute_report2(res_id, wialon, ID, from_time, to_time)
+        volume_tank, end_fuel_f, fuel_up_f, fuel_down, start_fuel_f = execute_report2(res_id, wialon, ID, from_time,
+                                                                                      to_time)
     else:
         return 'No API resourses'
 
@@ -124,7 +127,7 @@ def norm(requesthandler):
     else:
         callback_retr += "Расход сходится;"
 
-    callback_retr += str(consum_f) + ';' 
+    callback_retr += str(consum_f) + ';'
 
     return callback_retr
 
@@ -134,20 +137,20 @@ def test(requestbot):
     req_b = str(requestbot)
     token, ID, TimeFrom, TimeTo = req_b.split(';')
     if token == 'db1cee3b1f964df20f8d163a1423b6c6286A919144720D152383E5DD77C6113AD31CDC9A':
-       token = 'db1cee3b1f964df20f8d163a1423b6c67D562ED72C4E60F2797A1247C61C9B977DBC7DCA'
+        token = 'db1cee3b1f964df20f8d163a1423b6c67D562ED72C4E60F2797A1247C61C9B977DBC7DCA'
     y, m, d, h, min, s = TimeFrom.split('-')
     y1, m1, d1, h1, min1, s1 = TimeTo.split('-')
     t1 = datetime.datetime(int(y), int(m), int(d), int(h), int(min), int(s))
     from_time = int(str(time.mktime(t1.timetuple()))[:-2]) - 25200
     t2 = datetime.datetime(int(y1), int(m1), int(d1), int(h1), int(min1), int(s1))
     to_time = int(str(time.mktime(t2.timetuple()))[:-2]) - 25200
-
     wialon = Wialon()
-    login = None
+
     try:
         login = wialon.token_login(token=str(token))
     except WialonError as e:
-        return('Error while login')
+        return ('Error while login')
+
     wialon.sid = login['eid']
     res_id = api_wialon_dwnData(wialon)
 
@@ -180,8 +183,8 @@ def test(requestbot):
 
     data_obj = wialon.core_search_item({"id": ID, "flags": 0x00000001})
     name_obj = data_obj['item']['nm']
-    start_period = "{}.{}.{}. {}:{}:{}".format(d,m,y,h,min,s)
-    end_period = '{}.{}.{}. {}:{}:{}'.format(d1,m1,y1,h1,min1,s1)
+    start_period = "{}.{}.{}. {}:{}:{}".format(d, m, y, h, min, s)
+    end_period = '{}.{}.{}. {}:{}:{}'.format(d1, m1, y1, h1, min1, s1)
 
     return render_template('test_first.html', name=name_obj, probeg=probeg, motoh=motoh, start_fuel=start_fuel,
                            end_fuel=end_fuel, fuel_up=fuel_up, fuel_down=fuel_down, start_period=start_period,
@@ -192,11 +195,10 @@ def test(requestbot):
 
 @app.route("/KrayDEO/test_norm/<requesthandler>", methods=['GET'])
 def test_norm(requesthandler):
-
     req_b = str(requesthandler)
     token, ID, TimeFrom, TimeTo, start_fuel_n, consumption_n, fuel_up = req_b.split(';')
     if token == 'db1cee3b1f964df20f8d163a1423b6c6286A919144720D152383E5DD77C6113AD31CDC9A':
-       token = 'db1cee3b1f964df20f8d163a1423b6c67D562ED72C4E60F2797A1247C61C9B977DBC7DCA'
+        token = 'db1cee3b1f964df20f8d163a1423b6c67D562ED72C4E60F2797A1247C61C9B977DBC7DCA'
     start_fuel_n.replace(',', '.')
     consumption_n.replace(',', '.')
     fuel_up.replace(',', '.')
@@ -215,13 +217,14 @@ def test_norm(requesthandler):
     try:
         login = wialon.token_login(token=str(token))
     except WialonError as e:
-        return('Error while login')
+        return ('Error while login')
 
     wialon.sid = login['eid']
     res_id = api_wialon_dwnData(wialon)
 
     if res_id:
-        volume_tank, end_fuel_f, fuel_up_f, fuel_down, start_fuel_f = execute_report2(res_id, wialon, ID, from_time, to_time)
+        volume_tank, end_fuel_f, fuel_up_f, fuel_down, start_fuel_f = execute_report2(res_id, wialon, ID, from_time,
+                                                                                      to_time)
     else:
         return 'No API resourses'
 
@@ -247,7 +250,7 @@ def test_norm(requesthandler):
         callback_retr += str(round(fuel_down, 2)) + ";"
     else:
         callback_retr += "0;"  # Слив ОК
-    diff_start = round(float(start_fuel_n)-float(start_fuel_f))
+    diff_start = round(float(start_fuel_n) - float(start_fuel_f))
     if callback.fuel_start:
         callback_retr += "Нач ур. не сходится!;"
         callback_start_info = "Нач ур. не сходится! Разница в {} л.".format(diff_start)
@@ -257,7 +260,7 @@ def test_norm(requesthandler):
 
     """Дальше один из 4 вариантов"""
     if callback.short:
-        pr_volume_consum = round((float(consumption_n)/float(volume_tank))*100, 2)
+        pr_volume_consum = round((float(consumption_n) / float(volume_tank)) * 100, 2)
         callback_retr += "Короткая поездка, списание по норме;"
         callback_consum_info = "Короткая поездка, потрачено {}% от бака, списание по норме".format(pr_volume_consum)
 
@@ -283,17 +286,49 @@ def test_norm(requesthandler):
     end_fuel_n = float(start_fuel_n) - float(consumption_n) + float(fuel_up)
     data_obj = wialon.core_search_item({"id": ID, "flags": 0x00000001})
     name_obj = data_obj['item']['nm']
-    start_period = '{}.{}.{}. {}:{}:{}'.format(d,m,y,h,min,s)
-    end_period = '{}.{}.{}. {}:{}:{}'.format(d1,m1,y1,h1,min1,s1)
+    start_period = '{}.{}.{}. {}:{}:{}'.format(d, m, y, h, min, s)
+    end_period = '{}.{}.{}. {}:{}:{}'.format(d1, m1, y1, h1, min1, s1)
     consum_smt = float(start_fuel_f) + (fuel_up_f) - (end_fuel_f)
+    consum_smt = round(consum_smt, 2)
+
+    write_db(name_obj, start_period, end_period, start_fuel_n, start_fuel_f, end_fuel_n, end_fuel_f, fuel_up, fuel_up_f,
+             consumption_n, consum_smt, consum_f)
+
     return render_template('test_norm.html', name=name_obj, start_p=start_period,
                            end_period=end_period, start_fuel_n=start_fuel_n,
                            start_fuel_f=start_fuel_f, consumption_n=consumption_n, consum_f=consum_f, fuel_up=fuel_up,
                            fuel_up_f=fuel_up_f, fuel_down=fuel_down, callback=callback_retr,
                            callback_fuel_info=callback_fuel_info, callback_consum_info=callback_consum_info,
                            volume_tank=volume_tank, end_fuel_n=end_fuel_n, end_fuel_f=end_fuel_f,
-                           callback_start_info=callback_start_info, fuel_down_info=fuel_down_info, consum_smt=consum_smt)
+                           callback_start_info=callback_start_info, fuel_down_info=fuel_down_info,
+                           consum_smt=consum_smt)
+
+
+@db_session
+def write_db(name_obj, start_period, end_period, start_fuel_n, start_fuel_f, end_fuel_n, end_fuel_f, fuel_up, fuel_up_f,
+             consumption_n, consum_smt, consum_f):
+    Travel(date_p=datetime.datetime.now(),
+           name_object=name_obj,
+           start_time=start_period,
+           end_time=end_period,
+           start_fuel_p=start_fuel_n,
+           start_fuel_w=start_fuel_f,
+           end_fuel_p=end_fuel_n,
+           end_fuel_w=end_fuel_f,
+           fuel_up_p=fuel_up,
+           fuel_up_w=fuel_up_f,
+           consum_p=consumption_n,
+           consum_w=consum_smt,
+           consum_f=consum_f)
+
+
+@app.route("/KrayDEO/test_norm/travel", methods=['GET'])
+@db_session
+def travel_base():
+    travels = select(p for p in Travel)
+    return render_template('travel_base.html', travels=travels)
 
 
 if __name__ == "__main__":
-    app.run(host='10.128.0.2', port=4567, debug=True, threaded=True)
+    # app.run(host='10.128.0.2', port=4567, debug=True, threaded=True)
+    app.run(host='10.119.4.138', port=4567, debug=True, threaded=True)
