@@ -1,0 +1,29 @@
+<head>
+    <link rel="stylesheet" type="text/css" href="{{url_for('static', filename='menu.css', v=5)}}">
+</head>
+<body>
+        <nav>
+          <ul class="topmenu">
+            <li><a href="" class="active">Главная<span class="fa fa-angle-down"></span></a>
+              <ul class="submenu">
+                <li><a href="">Тест проверки ТС</a>
+                </li>
+                <li><a href="">Тест проверки расхода<span class="fa fa-angle-down"></span></a>
+                  <ul class="submenu">
+                <li><a href="">заглушка</a></li>
+                <li><a href="">заглушка</a></li>
+                <li><a href="">заглушка</a></li>
+              </ul>
+                </li>
+                <li><a href="">заглушка</a></li>
+              </ul>
+            </li>
+            <li><a href="">Путевые листы</a></li>
+            <li><a href="">Заглушка</a></li>
+            <li><a href="">Заглушка</a></li>
+            <li><a href="">Заглушка</a></li>
+            <li><a href="">Заглушка</a></li>
+          </ul>
+        </nav>
+     {% block content %}{% endblock %}
+</body>
