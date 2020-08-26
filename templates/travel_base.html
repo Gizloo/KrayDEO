@@ -1,17 +1,23 @@
 <!DOCTYPE html>
 <html lang="en">
+{% extends "menu.html" %}
+{% block content %}
 <head>
     <meta charset="UTF-8">
     <title>Путевые</title>
-    <style>
-      table {width: 100%; border-collapse: separate; border-spacing: 4px;}
-      table thead tr {color: #ffffff; font-weight: bold; text-align: center}
-      table thead tr td {border-radius: 4px 4px 0 0; background: #2e82c3;}
-      table tbody tr td {border: 1px solid #2e82c3; border-radius: 4px; background: #cbdfef;}
-      table tbody tr td:hover {background: #a2c3dd; transition-duration: 0.2s;}
-    </style>
 </head>
 <body>
+
+<div class="my-flex-container">
+
+<ul class="category-list">
+  <li><a href="">Объект раз</a><span>5</span></li>
+  <li><a href="">Объект два</a><span>3</span></li>
+  <li><a href="">Объект три</a><span>2</span></li>
+  <li><a href="">Объект длинннный шо пиздец с 124 регионом</a><span>2</span></li>
+</ul>
+
+
 <table>
   <thead>
     <tr>
@@ -50,5 +56,7 @@
      {% endfor %}
   </tbody>
 </table>
+</div>
 </body>
+{% endblock %}
 </html>

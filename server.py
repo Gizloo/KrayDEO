@@ -322,13 +322,18 @@ def write_db(name_obj, start_period, end_period, start_fuel_n, start_fuel_f, end
            consum_f=consum_f)
 
 
-@app.route("/KrayDEO/test_norm/travel", methods=['GET'])
+@app.route("/KrayDEO/travel", methods=['GET'])
 @db_session
 def travel_base():
     travels = select(p for p in Travel)
     return render_template('travel_base.html', travels=travels)
 
 
+@app.route("/KrayDEO/menu", methods=['GET'])
+def menu():
+    return render_template('menu.html')
+
+
 if __name__ == "__main__":
     # app.run(host='10.128.0.2', port=4567, debug=True, threaded=True)
-    app.run(host='10.119.4.138', port=4567, debug=True, threaded=True)
+    app.run(host='localhost', port=4567, debug=True, threaded=True)
