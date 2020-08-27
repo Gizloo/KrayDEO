@@ -4,7 +4,7 @@ from pony.orm import *
 db = Database()
 
 db.bind(provider='postgres',
-        user='perevodov.mv',
+        user='postgres',
         password='gotish131313',
         host='localhost',
         database='test_base')

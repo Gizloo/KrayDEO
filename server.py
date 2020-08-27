@@ -335,5 +335,5 @@ def menu():
 
 
 if __name__ == "__main__":
-    # app.run(host='10.128.0.2', port=4567, debug=True, threaded=True)
-    app.run(host='localhost', port=4567, debug=True, threaded=True)
+    app.run(host='10.128.0.2', port=4567, debug=True, threaded=True)
+    # app.run(host='localhost', port=4567, debug=True, threaded=True)
