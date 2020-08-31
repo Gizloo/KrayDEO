@@ -385,7 +385,7 @@ def travel_base():
     travels = select(p for p in Travel)
     objs = select(o for o in Object)
     for obj in objs:
-        count_base.append(select(c for c in Travel if obj.wialon_id == Travel.wialon))
+        count_base.append(select(c for c in Travel if obj.wialon_id == c.wialon))
     return render_template('travel.html',
                            travels=travels, objs=objs, count_base=count_base)
 
@@ -409,7 +409,7 @@ def test_travel_base():
     travels = select(p for p in Travel_Test)
     objs = select(o for o in Object_Test)
     for obj in objs:
-        obj.count = count(c for c in Travel_Test if obj.wialon_id == Travel_Test.wialon)
+        obj.count = count(c for c in Travel_Test if obj.wialon_id == c.wialon)
     return render_template('test_travel.html',
                            travels=travels, objs=objs)
 
@@ -417,7 +417,7 @@ def test_travel_base():
 @app.route("/KrayDEO/test/travel/<id_wialon>;<start_time>;<end_time>", methods=['GET'])
 @db_session
 def test_travel_base_obj(id_wialon, start_time, end_time):
-    count_base = []
+
     id_wialon = str(id_wialon)
     objs = select(o for o in Object_Test)
     travels = select(p for p in Travel_Test if p.wialon == id_wialon)
