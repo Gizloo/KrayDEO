@@ -3,7 +3,7 @@ import datetime
 import time
 
 from pony import orm
-from pony.orm import select, db_session, commit
+from pony.orm import select, db_session, commit, count
 from wialon import Wialon, WialonError
 from flask import Flask, render_template
 from Exec_report import execute_report, execute_report2
@@ -11,6 +11,7 @@ from down_data import api_wialon_dwnData
 from handler import handler1, handler2
 from models.base_model import Travel, Object
 from models.test_model import Travel_Test, Object_Test
+
 app = Flask(__name__)
 
 
@@ -337,21 +338,21 @@ def write_db(wialon, name, start_period, end_period, start_fuel_n, start_fuel_f,
             Object_Test(wialon_id=wialon, name=name)
 
         Travel_Test(date_p=datetime.datetime.now(),
-               name_object=name,
-               start_time=start_period,
-               end_time=end_period,
-               start_fuel_p=start_fuel_n,
-               start_fuel_w=start_fuel_f,
-               end_fuel_p=end_fuel_n,
-               end_fuel_w=end_fuel_f,
-               fuel_up_p=fuel_up,
-               fuel_up_w=fuel_up_f,
-               fuel_down=fuel_down,
-               consum_p=consumption_n,
-               consum_w=consum_smt,
-               consum_f=consum_f,
-               wialon=wialon,
-               result=comm)
+                    name_object=name,
+                    start_time=start_period,
+                    end_time=end_period,
+                    start_fuel_p=start_fuel_n,
+                    start_fuel_w=start_fuel_f,
+                    end_fuel_p=end_fuel_n,
+                    end_fuel_w=end_fuel_f,
+                    fuel_up_p=fuel_up,
+                    fuel_up_w=fuel_up_f,
+                    fuel_down=fuel_down,
+                    consum_p=consumption_n,
+                    consum_w=consum_smt,
+                    consum_f=consum_f,
+                    wialon=wialon,
+                    result=comm)
     else:
         objs = select(o for o in Object)
         if any(int(obj.wialon_id) == int(wialon) for obj in objs):
@@ -380,10 +381,13 @@ def write_db(wialon, name, start_period, end_period, start_fuel_n, start_fuel_f,
 @app.route("/KrayDEO/travel", methods=['GET'])
 @db_session
 def travel_base():
+    count_base = []
     travels = select(p for p in Travel)
     objs = select(o for o in Object)
+    for obj in objs:
+        count_base.append(select(c for c in Travel if obj.wialon_id == Travel.wialon))
     return render_template('travel.html',
-                           travels=travels, objs=objs)
+                           travels=travels, objs=objs, count_base=count_base)
 
 
 @app.route("/KrayDEO/travel/<id_wialon>;<start_time>;<end_time>", methods=['GET'])
@@ -392,6 +396,8 @@ def travel_base_obj(id_wialon, start_time, end_time):
     id_wialon = str(id_wialon)
     objs = select(o for o in Object)
     travels = select(p for p in Travel if p.wialon == id_wialon)
+    for obj in objs:
+        obj.count = count(c for c in Travel_Test if obj.wialon_id == c.wialon)
     return render_template('travel.html',
                            travels=travels, objs=objs)
 
@@ -399,9 +405,11 @@ def travel_base_obj(id_wialon, start_time, end_time):
 @app.route("/KrayDEO/test/travel", methods=['GET'])
 @db_session
 def test_travel_base():
+    count_base = []
     travels = select(p for p in Travel_Test)
     objs = select(o for o in Object_Test)
-
+    for obj in objs:
+        obj.count = count(c for c in Travel_Test if obj.wialon_id == Travel_Test.wialon)
     return render_template('test_travel.html',
                            travels=travels, objs=objs)
 
@@ -409,9 +417,12 @@ def test_travel_base():
 @app.route("/KrayDEO/test/travel/<id_wialon>;<start_time>;<end_time>", methods=['GET'])
 @db_session
 def test_travel_base_obj(id_wialon, start_time, end_time):
+    count_base = []
     id_wialon = str(id_wialon)
     objs = select(o for o in Object_Test)
     travels = select(p for p in Travel_Test if p.wialon == id_wialon)
+    for obj in objs:
+        obj.count = count(c for c in Travel_Test if obj.wialon_id == c.wialon)
     return render_template('test_travel.html',
                            travels=travels, objs=objs)
 
