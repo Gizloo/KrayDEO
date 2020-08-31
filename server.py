@@ -10,7 +10,7 @@ from Exec_report import execute_report, execute_report2
 from down_data import api_wialon_dwnData
 from handler import handler1, handler2
 from models.base_model import Travel, Object
-
+from models.test_model import Travel_Test, Object_Test
 app = Flask(__name__)
 
 
@@ -313,7 +313,8 @@ def test_norm(requesthandler):
     consum_smt = round(consum_smt, 2)
 
     write_db(ID, name_obj, start_period, end_period, start_fuel_n, start_fuel_f,
-             end_fuel_n, end_fuel_f, fuel_up, fuel_up_f, fuel_down, consumption_n, consum_smt, consum_f, callback_consum_info)
+             end_fuel_n, end_fuel_f, fuel_up, fuel_up_f, fuel_down, consumption_n,
+             consum_smt, consum_f, callback_consum_info, Test=True)
 
     return render_template('test_norm.html', name=name_obj, start_p=start_period,
                            end_period=end_period, start_fuel_n=start_fuel_n,
@@ -327,29 +328,53 @@ def test_norm(requesthandler):
 
 @db_session
 def write_db(wialon, name, start_period, end_period, start_fuel_n, start_fuel_f, end_fuel_n, end_fuel_f, fuel_up,
-             fuel_up_f, fuel_down, consumption_n, consum_smt, consum_f, comm):
-    objs = select(o for o in Object)
-    if any(int(obj.wialon_id) == int(wialon) for obj in objs):
-        pass
-    else:
-        Object(wialon_id=wialon, name=name)
+             fuel_up_f, fuel_down, consumption_n, consum_smt, consum_f, comm, Test=False):
+    if Test:
+        objs = select(o for o in Object_Test)
+        if any(int(obj.wialon_id) == int(wialon) for obj in objs):
+            pass
+        else:
+            Object_Test(wialon_id=wialon, name=name)
 
-    Travel(date_p=datetime.datetime.now(),
-           name_object=name,
-           start_time=start_period,
-           end_time=end_period,
-           start_fuel_p=start_fuel_n,
-           start_fuel_w=start_fuel_f,
-           end_fuel_p=end_fuel_n,
-           end_fuel_w=end_fuel_f,
-           fuel_up_p=fuel_up,
-           fuel_up_w=fuel_up_f,
-           fuel_down=fuel_down,
-           consum_p=consumption_n,
-           consum_w=consum_smt,
-           consum_f=consum_f,
-           wialon=wialon,
-           result=comm)
+        Travel_Test(date_p=datetime.datetime.now(),
+               name_object=name,
+               start_time=start_period,
+               end_time=end_period,
+               start_fuel_p=start_fuel_n,
+               start_fuel_w=start_fuel_f,
+               end_fuel_p=end_fuel_n,
+               end_fuel_w=end_fuel_f,
+               fuel_up_p=fuel_up,
+               fuel_up_w=fuel_up_f,
+               fuel_down=fuel_down,
+               consum_p=consumption_n,
+               consum_w=consum_smt,
+               consum_f=consum_f,
+               wialon=wialon,
+               result=comm)
+    else:
+        objs = select(o for o in Object)
+        if any(int(obj.wialon_id) == int(wialon) for obj in objs):
+            pass
+        else:
+            Object(wialon_id=wialon, name=name)
+
+        Travel(date_p=datetime.datetime.now(),
+               name_object=name,
+               start_time=start_period,
+               end_time=end_period,
+               start_fuel_p=start_fuel_n,
+               start_fuel_w=start_fuel_f,
+               end_fuel_p=end_fuel_n,
+               end_fuel_w=end_fuel_f,
+               fuel_up_p=fuel_up,
+               fuel_up_w=fuel_up_f,
+               fuel_down=fuel_down,
+               consum_p=consumption_n,
+               consum_w=consum_smt,
+               consum_f=consum_f,
+               wialon=wialon,
+               result=comm)
 
 
 @app.route("/KrayDEO/travel", methods=['GET'])
@@ -368,6 +393,26 @@ def travel_base_obj(id_wialon, start_time, end_time):
     objs = select(o for o in Object)
     travels = select(p for p in Travel if p.wialon == id_wialon)
     return render_template('travel.html',
+                           travels=travels, objs=objs)
+
+
+@app.route("/KrayDEO/test/travel", methods=['GET'])
+@db_session
+def test_travel_base():
+    travels = select(p for p in Travel_Test)
+    objs = select(o for o in Object_Test)
+
+    return render_template('test_travel.html',
+                           travels=travels, objs=objs)
+
+
+@app.route("/KrayDEO/test/travel/<id_wialon>;<start_time>;<end_time>", methods=['GET'])
+@db_session
+def test_travel_base_obj(id_wialon, start_time, end_time):
+    id_wialon = str(id_wialon)
+    objs = select(o for o in Object_Test)
+    travels = select(p for p in Travel_Test if p.wialon == id_wialon)
+    return render_template('test_travel.html',
                            travels=travels, objs=objs)
 
 

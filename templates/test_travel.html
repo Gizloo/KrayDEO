@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+{% extends "menu.html" %}
+{% block content %}
+<head>
+    <meta charset="UTF-8">
+    <title>Путевые</title>
+</head>
+<body>
+
+<div class="my-flex-container">
+
+<ul class="category-list">
+
+  {% for obj in objs %}
+    <li><a href="{{url_for ('test_travel_base_obj',
+            id_wialon=obj.wialon_id,
+            start_time=123,
+            end_time=123
+            )}}">{{ obj.name }}</a><span>5</span></li>
+  {% endfor %}
+
+</ul>
+<table>
+  <thead>
+    <tr>
+      <td>Дата загрузки</td>
+      <td>Имя объекта</td>
+      <td>Начало</td>
+      <td>Конец</td>
+      <td>Нач.уров.(П)</td>
+      <td>Нач.уров.(СМТ)</td>
+      <td>Кон.уров.(П)</td>
+      <td>Кон.уров.(СМТ)</td>
+      <td>Заправка(П)</td>
+      <td>Заправка(СМТ)</td>
+      <td>Расход(П)</td>
+      <td>Расход(СМТ)</td>
+      <td>Расход(Факт)</td>
+      <td>Результат</td>
+    </tr>
+  </thead>
+  <tbody>
+     {% for travel in travels %}
+        <tr>
+          <td>{{ travel.date_p.strftime("%d.%m.%y %H:%M")}}</td>
+          <td>{{ travel.name_object }}</td>
+          <td>{{ travel.start_time }}</td>
+          <td>{{ travel.end_time }}</td>
+          <td>{{ travel.start_fuel_p }}</td>
+          <td>{{ travel.start_fuel_w }}</td>
+          <td>{{ travel.end_fuel_p }}</td>
+          <td>{{ travel.end_fuel_w }}</td>
+          <td>{{ travel.fuel_up_p }}</td>
+          <td>{{ travel.fuel_up_w }}</td>
+          <td>{{ travel.consum_p }}</td>
+          <td>{{ travel.consum_w }}</td>
+          <td>{{ travel.consum_f }}</td>
+          <td>{{ travel.result }}</td>
+         </tr>
+     {% endfor %}
+  </tbody>
+</table>
+</div>
+</body>
+{% endblock %}
+</html>
