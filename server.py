@@ -385,7 +385,7 @@ def travel_base():
     travels = select(p for p in Travel)
     objs = select(o for o in Object)
     for obj in objs:
-        count_base.append(select(c for c in Travel if obj.wialon_id == c.wialon))
+        obj.count = count(c for c in Travel_Test if obj.wialon_id == c.wialon)
     return render_template('travel.html',
                            travels=travels, objs=objs, count_base=count_base)
 
@@ -397,7 +397,7 @@ def travel_base_obj(id_wialon, start_time, end_time):
     objs = select(o for o in Object)
     travels = select(p for p in Travel if p.wialon == id_wialon)
     for obj in objs:
-        obj.count = count(c for c in Travel_Test if obj.wialon_id == c.wialon)
+        obj.count = count(c for c in Travel if obj.wialon_id == c.wialon)
     return render_template('travel.html',
                            travels=travels, objs=objs)
 
