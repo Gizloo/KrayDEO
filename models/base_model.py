@@ -4,10 +4,15 @@ from pony.orm import *
 db = Database()
 
 db.bind(provider='postgres',
-        user='perevodov.mv',
-        password='gotish131313',
+        user='postgres',
+        password='1234',
         host='localhost',
-        database='test_base')
+        database='kraydeo_travel_base')
+
+
+class Object(db.Entity):
+    wialon_id = Required(int)
+    name = Required(str)
 
 
 class Travel(db.Entity):
@@ -21,9 +26,12 @@ class Travel(db.Entity):
     end_fuel_w = Required(float)
     fuel_up_p = Required(float)
     fuel_up_w = Required(float)
+    fuel_down = Required(float)
     consum_p = Required(float)
     consum_w = Required(float)
     consum_f = Required(float)
+    wialon = Required(int)
+    result = Required(str)
 
 
 db.generate_mapping(create_tables=True)

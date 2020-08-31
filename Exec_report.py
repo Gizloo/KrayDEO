@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 import datetime
 from pprint import pprint
-
 from wialon import flags, Wialon, WialonError
 
 
@@ -88,8 +87,6 @@ def execute_report(res_id, wialon, id, t1, t2):
 
 
 def execute_report2(res_id, wialon, id, t1, t2):
-    units1 = None
-
     units = wialon.report_exec_report({
         'reportResourceId': res_id,
         'reportTemplateId': 2,
@@ -97,11 +94,11 @@ def execute_report2(res_id, wialon, id, t1, t2):
         'reportObjectSecId': 0,
         'interval': {'from': t1, 'to': t2, 'flags': 0}})
 
+
     units1 = wialon.report_get_result_rows({
-        "tableIndex": 0,
-        "indexFrom": 0,
-        "indexTo": 0
-    })
+            "tableIndex": 0,
+            "indexFrom": 0,
+            "indexTo": 0})
 
     volume_tank = units1[0]['c'][0]
     end_fuel_f = units1[0]['c'][5][:units1[0]['c'][5].find(' '):]

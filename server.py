@@ -2,13 +2,14 @@
 import datetime
 import time
 
+from pony import orm
 from pony.orm import select, db_session, commit
 from wialon import Wialon, WialonError
 from flask import Flask, render_template
 from Exec_report import execute_report, execute_report2
 from down_data import api_wialon_dwnData
 from handler import handler1, handler2
-from models.base_model import Travel
+from models.base_model import Travel, Object
 
 app = Flask(__name__)
 
@@ -76,6 +77,7 @@ def norm(requesthandler):
     from_time = int(str(time.mktime(t1.timetuple()))[:-2]) - 25200
     t2 = datetime.datetime(int(y1), int(m1), int(d1), int(h1), int(min1), int(s1))
     to_time = int(str(time.mktime(t2.timetuple()))[:-2]) - 25200
+    callback_consum_info = ""
 
     wialon = Wialon()
     login = None
@@ -99,8 +101,10 @@ def norm(requesthandler):
 
     if callback.fuel_up:
         callback_retr += "Заправка не сходится:" + str(round(fuel_up_f - fuel_up, 2)) + ";"
+        callback_consum_info += "Заправка не сходится:" + str(round(fuel_up_f - fuel_up, 2)) + '\n'
     elif callback.nedoliv:
         callback_retr += "Недолив:" + str(round((fuel_up - fuel_up_f), 2)) + ";"
+        callback_consum_info += "Недолив:" + str(round((fuel_up - fuel_up_f), 2)) + '\n'
     else:
         callback_retr += "Ok;"  # Заправка ОК
 
@@ -111,23 +115,40 @@ def norm(requesthandler):
 
     if callback.fuel_start:
         callback_retr += "Нач ур. не сходится!;"
+        callback_consum_info += "Нач ур. не сходится! \n"
+
     else:
         callback_retr += "Ok;"  # Нач ур. ОК
 
     """Дальше один из 4 вариантов"""
     if callback.short:
         callback_retr += "Короткая поездка, списание по норме;"
+        callback_consum_info += "Короткая поездка, списание по норме \n"
 
     elif callback.perejog:
         callback_retr += "Пережог топлива:" + str(round(consum_f - consumption_n, 2)) + ", списание по факту;"
+        callback_consum_info += "Пережог топлива:" + str(round(consum_f - consumption_n, 2)) + ", списание по факту"
 
-    elif callback.economy and not callback.nedoliv and not callback.fuel_down:
+    elif callback.economy:
         callback_retr += "Экономия топлива:" + str(round(consumption_n - consum_f, 2)) + ", списание по факту;"
+        callback_consum_info += "Экономия топлива:" + str(round(consumption_n - consum_f, 2)) + ", списание по факту"
 
     else:
         callback_retr += "Расход сходится;"
+        callback_consum_info += "Расход сходится"
 
     callback_retr += str(consum_f) + ';'
+    end_fuel_n = float(start_fuel_n) - float(consumption_n) + float(fuel_up)
+    data_obj = wialon.core_search_item({"id": ID, "flags": 0x00000001})
+    name_obj = data_obj['item']['nm']
+    start_period = '{}.{}.{}. {}:{}:{}'.format(d, m, y, h, min, s)
+    end_period = '{}.{}.{}. {}:{}:{}'.format(d1, m1, y1, h1, min1, s1)
+    consum_smt = float(start_fuel_f) + (fuel_up_f) - (end_fuel_f)
+    consum_smt = round(consum_smt, 2)
+
+    write_db(ID, name_obj, start_period, end_period, start_fuel_n, start_fuel_f,
+             end_fuel_n, end_fuel_f, fuel_up, fuel_up_f, fuel_down, consumption_n, consum_smt, consum_f,
+             callback_consum_info)
 
     return callback_retr
 
@@ -291,8 +312,8 @@ def test_norm(requesthandler):
     consum_smt = float(start_fuel_f) + (fuel_up_f) - (end_fuel_f)
     consum_smt = round(consum_smt, 2)
 
-    write_db(name_obj, start_period, end_period, start_fuel_n, start_fuel_f, end_fuel_n, end_fuel_f, fuel_up, fuel_up_f,
-             consumption_n, consum_smt, consum_f)
+    write_db(ID, name_obj, start_period, end_period, start_fuel_n, start_fuel_f,
+             end_fuel_n, end_fuel_f, fuel_up, fuel_up_f, fuel_down, consumption_n, consum_smt, consum_f, callback_consum_info)
 
     return render_template('test_norm.html', name=name_obj, start_p=start_period,
                            end_period=end_period, start_fuel_n=start_fuel_n,
@@ -305,10 +326,16 @@ def test_norm(requesthandler):
 
 
 @db_session
-def write_db(name_obj, start_period, end_period, start_fuel_n, start_fuel_f, end_fuel_n, end_fuel_f, fuel_up, fuel_up_f,
-             consumption_n, consum_smt, consum_f):
+def write_db(wialon, name, start_period, end_period, start_fuel_n, start_fuel_f, end_fuel_n, end_fuel_f, fuel_up,
+             fuel_up_f, fuel_down, consumption_n, consum_smt, consum_f, comm):
+    objs = select(o for o in Object)
+    if any(int(obj.wialon_id) == int(wialon) for obj in objs):
+        pass
+    else:
+        Object(wialon_id=wialon, name=name)
+
     Travel(date_p=datetime.datetime.now(),
-           name_object=name_obj,
+           name_object=name,
            start_time=start_period,
            end_time=end_period,
            start_fuel_p=start_fuel_n,
@@ -317,23 +344,33 @@ def write_db(name_obj, start_period, end_period, start_fuel_n, start_fuel_f, end
            end_fuel_w=end_fuel_f,
            fuel_up_p=fuel_up,
            fuel_up_w=fuel_up_f,
+           fuel_down=fuel_down,
            consum_p=consumption_n,
            consum_w=consum_smt,
-           consum_f=consum_f)
+           consum_f=consum_f,
+           wialon=wialon,
+           result=comm)
 
 
 @app.route("/KrayDEO/travel", methods=['GET'])
 @db_session
 def travel_base():
     travels = select(p for p in Travel)
-    return render_template('travel_base.html', travels=travels)
+    objs = select(o for o in Object)
+    return render_template('travel.html',
+                           travels=travels, objs=objs)
 
 
-@app.route("/KrayDEO/menu", methods=['GET'])
-def menu():
-    return render_template('menu.html')
+@app.route("/KrayDEO/travel/<id_wialon>;<start_time>;<end_time>", methods=['GET'])
+@db_session
+def travel_base_obj(id_wialon, start_time, end_time):
+    id_wialon = str(id_wialon)
+    objs = select(o for o in Object)
+    travels = select(p for p in Travel if p.wialon == id_wialon)
+    return render_template('travel.html',
+                           travels=travels, objs=objs)
 
 
 if __name__ == "__main__":
+    app.run(host='localhost', port=4568, debug=False, threaded=True)
     # app.run(host='10.128.0.2', port=4567, debug=True, threaded=True)
-    app.run(host='localhost', port=4567, debug=True, threaded=True)
